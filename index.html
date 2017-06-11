@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SteemTools.com - An overview of Tools &amp; Services for Steem</title>
+    <meta  name="description" content="An overview of Tools &amp; Services for Steem(it) Blockchain">
+    <meta property="og:title" content="An overview of Tools &amp; Services for Steem">
+<meta property="og:site_name" content="SteemTools.com">
+<!-- <meta property="og:image" content="http://SteemStream.com/ogimage.jpg"> -->
+<meta property="og:url" content="http://steemtools.com">
+<meta property="og:description" content="An overview of Tools &amp; Services for Steem">
+<meta property="og:type" content="website">
+
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="theme-color" content="#ffffff">
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+<link href='https://fonts.googleapis.com/css?family=Source+Serif+Pro|Source+Sans+Pro' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+var gkey = '1jutNscxnHkgBt_0qXtSrCgK3txz1Ec2s_OLZ9SQlbAM';
+var auth = 'AIzaSyCGCwZFG2V3iuxb8QNQwhZ2_zzfunwYY7s';
+</script>
+
+<script type="text/javascript">
+
+var alldata = [];
+var tempdata = [];
+
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (60*60*1000));
+    var expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + "; " + expires;
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length,c.length);
+        }
+    }
+    return false;
+}
+
+var rankings = [];
+
+function doGsheet() {
+
+  $.getJSON( "rankings.json?r="+Math.random(), function( data ) {
+    rankings = [];
+    $.each( data.items, function( key, val ) {
+      //console.log(val);
+
+      if(val['identifier'].substring(0, 5) == "item_") {
+        rankings[val.identifier] = val.likes;
+      }
+    });
+
+    //console.log(rankings);
+    gapi.client.setApiKey(auth);
+    var discoveryUrl = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
+    gapi.client.load(discoveryUrl).then(getContents);
+  });
+
+
+
+};
+
+
+
+
+function checkInArray(search) {
+
+  if(search.length > 0) {
+
+    if(alldata.length > 0) {
+      tempdata = [];
+      for (var i = 0; i < alldata.length; i++) {
+
+          var item = alldata[i];
+          //console.log(alldata[i]);
+
+          for (var j = 0; j < item.length; j++) {
+            if(isNaN(parseFloat(item[j]))) {
+              if( (item[j]).toLowerCase().indexOf((search).toLowerCase()) !== -1 ) {
+                  tempdata.push(item);
+                  break;
+              }
+            }
+          }
+      }
+
+      //drawContent(tempdata);
+      shuffle(tempdata, drawContent);
+
+    } else {
+      //drawContent(alldata);
+      shuffle(alldata, drawContent);
+    }
+
+  } else {
+    //drawContent(alldata);
+    shuffle(alldata, drawContent);
+  }
+}
+
+function shuffle(array, cb) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  //return array;
+  if(cb) {
+    cb(array);
+  }
+}
+
+function sortbyRanking() {
+
+  alldata.sort(function(a, b) {
+    return b[6] - a[6];
+  });
+
+  drawContent(alldata);
+
+}
+
+function drawContent(data) {
+
+
+
+  var html = '';
+
+  for (i = 0; i < data.length; i++) {
+    var row = data[i];
+    //console.log(row);
+
+
+    // Print columns A and E, which correspond to indices 0 and 4.
+    //
+    //
+    //createRow(row);
+    //
+    if(i%4 == 0 && i == 0){
+     html += '<div class="row row-flex row-flex-wrap">'; // opening row every 3
+   }
+     if( i%4 == 0 && i != 0){
+      html += '</div><div class="row row-flex row-flex-wrap">'; // opening row every 3
+    }
+
+    var upvotebuttonhtml = '<div class="upvotebtn"><span class="likebtn-wrapper" data-theme="custom" data-icon_l="arr11-u" data-icon_d="flg1" data-icon_size="20" data-icon_l_c_v="#4ba2f2" data-icon_d_c_v="#4ba2f2" data-label_c_v="#4ba2f2" data-counter_l_c="#1a5099" data-bg_c="#ffffff" data-brdr_c="transparent" data-f_family="Source Sans Pro" data-i18n_like="Upvote" data-white_label="true" data-identifier="item_'+row[5]+'" data-show_like_label="false" data-dislike_enabled="false" data-voting_frequency="604800" data-popup_html="<a href=&quot;http://steemit.com/@roelandp&quot;>Thx ft upvote. Like this update? <br/>Consider upvoting here too!</a>" data-share_enabled="false" data-lazy_load="true" data-i18n_like_tooltip="Upvote" data-i18n_unlike_tooltip="Remove upvote" data-i18n_popup_text="Thx for the upvote!"></span></div>';
+    html += '<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 colpad" title="'+row[0]+' by '+row[3]+'" data-href="'+row[1]+'"><div class="bordy flex-col"><div class="topfill"><h3>'+row[0]+'</h3></div><img src="'+row[4]+'" class="img-responsive appimg" /><div class="botcont"><p class="user"><a href="http://steemit.com/@'+row[3]+'" target="_blank"><span class="glyphicon glyphicon-user"></span> '+row[3]+'</a></p><p>'+row[2]+'</p><p class="srclink"><a href="'+row[1]+'" title="'+row[0]+'" target="_blank"><span class="glyphicon glyphicon-link"></span> '+row[1].replace('http://','')+'</a></p></div>'+upvotebuttonhtml+'</div></div>';
+
+    // if( i%4 == 3 ){
+    //
+    //   html += '</div>'; // closing row every 3
+    // }
+
+
+  }
+
+  html += '</div>';
+  $('#idrow').html(html);
+
+  if (typeof(LikeBtn) != "undefined") {
+      LikeBtn.init();
+  }
+
+}
+
+
+
+
+function getContents() {
+
+  var cookie = getCookie('cache');
+
+  //console.log(cookie);
+
+  if(cookie) {
+    //console.log('SETTING COOKIE FOR THE FIST TIME!');
+    setCookie('cache', JSON.stringify('cachecachecachecache'), 12);
+
+
+
+
+  gapi.client.sheets.spreadsheets.values.get({
+          spreadsheetId: gkey,
+          range: 'Sheet1!A1:F',
+        }).then(function(response) {
+          var range = response.result;
+
+
+
+
+          if (range.values.length > 0) {
+
+
+              //console.log(range.values);
+              alldata = range.values;
+
+              var tempalldata = [];
+
+              for(var i = 0; i < alldata.length; i++) {
+                var row = alldata[i];
+
+                row[6] = 0;
+
+                if('item_'+row[5] in rankings) {
+                  row[6] = rankings['item_'+row[5]];
+                }
+
+                tempalldata.push(row);
+              }
+
+              alldata = tempalldata;
+              shuffle(alldata, drawContent);
+
+              //console.log(alldata);
+              localStorage.setItem('tool', JSON.stringify(range.values));
+
+          } else {
+            $('#idrow').html(' No tools found, thats weird');
+          }
+        }, function(response) {
+          //console.log('Error: ' + response.result.error.message);
+        });
+
+
+      } else {
+        // get from localstorage...
+        //
+
+        //console.log('from local storage');
+        var apps = localStorage.getItem('tools');
+        //console.log('apps', apps);
+        if(apps != '' && apps != null) {
+
+          alldata = JSON.parse(apps);
+
+          //drawContent(alldata);
+          shuffle(alldata, drawContent);
+
+
+
+        } else {
+          // somehow error clear cookie en refresh
+          setCookie('cache', JSON.stringify('cachecachecachecache'), -200);
+          //console.log('apps', apps);
+          doGsheet();
+        }
+
+
+      }
+
+    }
+
+
+
+      /**
+       * Append a pre element to the body containing the given message
+       * as its text node.
+       *
+       * @param {string} message Text to be placed in pre element.
+       */
+      function appendPre(message) {
+        var pre = document.getElementById('output');
+        var textContent = document.createTextNode(message + '\n');
+        pre.appendChild(textContent);
+      }
+
+$( document ).ready(function() {
+
+
+
+  $('#searchfield').on('input', function(e){
+    var tosearch = $('#searchfield').val();
+
+
+    if(tosearch.length > 2) {
+      //$('.colpad:not(:contains("'+tosearch+'"))').css('opacity',0.05);
+      //$('.colpad(:contains("'+tosearch+'"))').css('opacity',1);
+      checkInArray(tosearch);
+
+    } else {
+
+      //$('.colpad').css('opacity',1);
+      //drawContent(alldata);
+      shuffle(alldata, drawContent);
+
+    }
+
+  });
+  $('#idrow').on('click','.colpad',function(e) {
+
+      window.open($(this).data('href'), '_blank');
+
+  });
+
+  $('#idrow').on('click','a', function(e){
+    e.stopPropagation();
+  });
+
+});
+
+
+</script>
+<script src="https://apis.google.com/js/client.js?onload=doGsheet"></script>
+<!-- Custom styles for this template -->
+<style style="display:none">/* Sticky footer styles
+-------------------------------------------------- */
+html {
+position: relative;
+min-height: 100%;
+}
+body {
+/* Margin bottom by footer height */
+margin-bottom: 60px;
+}
+.footer {
+position: absolute;
+bottom: 0;
+width: 100%;
+/* Set the fixed height of the footer here */
+height: 60px;
+background-color: #f5f5f5;
+}
+
+a {
+  color: #1a5099 !important;
+  text-decoration: none !important;
+}
+
+/* Custom page CSS
+-------------------------------------------------- */
+/* Not required for template or sticky footer method. */
+
+body > .container {
+padding: 60px 15px 0;
+}
+.container .text-muted {
+margin: 20px 0;
+}
+
+.footer > .container {
+padding-right: 15px;
+padding-left: 15px;
+}
+
+code {
+font-size: 80%;
+}
+
+.row {
+  margin: 10px 0px;
+}
+
+
+html, body {
+font-family: 'Source Sans Pro',Helvetica Neue,Helvetica,Arial,sans-serif;', // default font
+}
+.container {
+
+}
+
+.user {
+  font-family: 'Source Serif Pro', serif !important;
+  font-size: 15px;
+}
+
+.botcont {
+  padding: 10px;
+  position: relative;
+}
+
+.appimg {
+  border-top: 1px solid #1a5099;
+  border-bottom: 1px solid #1a5099;
+}
+
+.bordy {
+  /* margin: 5px; */
+	/* padding: 5px; */
+  border: #4ba2f2 1px solid;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+  overflow:hidden;
+  text-align: center;
+  transition: all 0.3s ease-out;
+}
+
+.bordy:hover {
+
+  -webkit-box-shadow: 0px 20px 157px 0px rgba(26,80,153,0.49);
+  -moz-box-shadow: 0px 20px 157px 0px rgba(26,80,153,0.49);
+  box-shadow: 0px 20px 157px 0px rgba(26,80,153,0.49);
+
+}
+
+
+
+.colpad {
+  padding: 10px;
+  cursor: pointer;
+
+}
+
+
+
+.topfill h3 {
+  margin: 0px;
+  color: #fff;
+  text-align: center;
+  font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Arial, sans-serif
+
+}
+
+.topfill {
+  padding-top: 20px;
+  padding-bottom: 15px;
+  background-color: #4ba2f2;
+
+}
+
+.row-flex, .row-flex > div[class*='col-'] {
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    flex:1 1 auto;
+}
+
+.row-flex-wrap {
+    -webkit-flex-flow: row wrap;
+    align-content: flex-start;
+    flex:0;
+}
+
+.row-flex > div[class*='col-'], .container-flex > div[class*='col-'] {
+     margin:-.2px; /* hack adjust for wrapping */
+}
+
+.container-flex > div[class*='col-'] div,.row-flex > div[class*='col-'] div {
+    width:100%;
+}
+
+
+.flex-col {
+    display: flex;
+    display: -webkit-flex;
+    flex: 1 100%;
+    flex-flow: column nowrap;
+}
+
+
+.spinner {
+  margin: 200px auto 0;
+  width: 200px;
+  text-align: center;
+}
+
+.spinner > div {
+  width: 30px;
+  height: 30px;
+  background-color: #4ba2f2;
+  margin: 10px;
+  border-radius: 100%;
+  display: inline-block;
+  -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+  animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+}
+
+.spinner .bounce1 {
+  -webkit-animation-delay: -0.32s;
+  animation-delay: -0.32s;
+}
+
+.spinner .bounce2 {
+  -webkit-animation-delay: -0.16s;
+  animation-delay: -0.16s;
+}
+
+@-webkit-keyframes sk-bouncedelay {
+  0%, 80%, 100% { -webkit-transform: scale(0) }
+  40% { -webkit-transform: scale(1.0) }
+}
+
+@keyframes sk-bouncedelay {
+  0%, 80%, 100% {
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  } 40% {
+    -webkit-transform: scale(1.0);
+    transform: scale(1.0);
+  }
+}
+
+.brandi {
+vertical-align: middle;
+
+}
+
+.svgtj {
+  float:left;
+  display: inline-block;
+  margin-right: 5px;
+  margin-top: -3px;
+}
+
+.logospan {
+
+}
+
+.searchcenter {
+  padding: 10px;
+  text-align: center;
+
+}
+
+.navbar-default-streemit {
+  background-color: #fefefe;
+border-bottom: 1px solid #e6e6e6;
+}
+
+.upvotebtn {
+    position: absolute;
+    bottom: 0px;
+    height: 40px;
+    text-align: center;
+    display: inline-block;
+    left: 0px;
+}
+
+.srclink {
+
+  margin-bottom: 40px;
+
+}
+
+.corner-ribbon{
+  width: 200px;
+  background: #e43;
+  position: absolute;
+  top: 25px;
+  left: -50px;
+  text-align: center;
+  line-height: 50px;
+  letter-spacing: 1px;
+  color: #f0f0f0;
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  cursor: pointer;
+}
+
+/* Custom styles */
+
+.corner-ribbon.sticky{
+  position: fixed;
+}
+
+.corner-ribbon.shadow{
+  box-shadow: 0 0 3px rgba(0,0,0,.3);
+}
+
+/* Different positions */
+
+.corner-ribbon.top-left{
+  top: 25px;
+  left: -50px;
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+}
+
+.corner-ribbon.top-right{
+  top: 25px;
+  right: -50px;
+  left: auto;
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+
+.corner-ribbon.bottom-left{
+  top: auto;
+  bottom: 25px;
+  left: -50px;
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+
+.corner-ribbon.bottom-right{
+  top: auto;
+  right: -50px;
+  bottom: 25px;
+  left: auto;
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  z-index: 1000;
+}
+
+/* Colors */
+
+.corner-ribbon.white{background: #f0f0f0; color: #555;}
+.corner-ribbon.black{background: #333;}
+.corner-ribbon.grey{background: #999;}
+.corner-ribbon.blue{background: #39d;}
+.corner-ribbon.green{background: #2c7;}
+.corner-ribbon.turquoise{background: #1b9;}
+.corner-ribbon.purple{background: #95b;}
+.corner-ribbon.red{background: #e43;}
+.corner-ribbon.orange{background: #e82;}
+.corner-ribbon.yellow{background: #ec0;}
+
+
+</style>
+</head>
+<body>
+  <div class="corner-ribbon bottom-right sticky blue" onclick="window.location.href='http://radiosteem.com';" title="Tune in to Radio Steem!">&#9835; RadioSteem &#9834;</div>
+
+
+  <!-- Fixed navbar -->
+    <nav class="navbar navbar-default-streemit navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">
+            <div class="svgtj">
+            <svg width="28" height="29" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <g>
+  <g transform="rotate(90 13.996265411376955,14.572190284729004) " id="svg_1" fill-rule="evenodd" fill="none">
+   <g id="steem">
+    <path fill="#1A5099" id="Fill-1" d="m4.22924,3.23196c-0.28435,-0.14192 -3.89137,2.83953 -3.89137,5.03304c-0.00498,2.99811 4.20746,9.79028 4.9168,12.41755c0.6104,2.25336 -1.03538,4.95777 -0.58303,5.08056c0.41316,0.26532 4.34312,-3.71447 4.49618,-5.41128c0.19725,-2.70194 -4.58889,-10.58068 -4.97031,-12.615c-0.4424,-2.3743 0.35031,-4.45181 0.03173,-4.50487l0,0l0,0z"></path>
+    <path fill="#4BA2F2" id="Fill-2" d="m13.23218,0.13019c-0.36214,-0.18079 -4.96347,3.6176 -4.96347,6.41826c-0.00498,3.82306 5.36667,12.48542 6.27076,15.83276c0.77777,2.87347 -1.31974,6.32262 -0.74605,6.47688c0.53014,0.33689 5.53902,-4.73379 5.73627,-6.90077c0.25262,-3.44421 -5.85325,-13.48994 -6.3392,-16.08821c-0.56373,-3.02032 0.44489,-5.67166 0.04169,-5.73892l0,0l0,0z"></path>
+    <path fill="#1A5099" id="Fill-3" d="m22.52382,3.23196c-0.28186,-0.14192 -3.89138,2.83953 -3.89138,5.03304c-0.00435,2.99811 4.20747,9.79028 4.91743,12.41755c0.60977,2.25336 -1.03538,4.95777 -0.58365,5.08056c0.41565,0.26532 4.34622,-3.71447 4.4968,-5.41128c0.19662,-2.70194 -4.58889,-10.58068 -4.97093,-12.615c-0.44178,-2.3743 0.35031,-4.45181 0.03173,-4.50487l0,0z"></path>
+   </g>
+  </g>
+ </g>
+</svg>
+          </div>
+          steem tools
+          </a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+
+          </ul>
+        <div class="pull-right">
+          <ul class="nav navbar-nav navbar-right">
+           <li><a href="https://steemit.com/steem/@roelandp/steemtools-com-indexing-all-tools-and-services-for-steemit-users">by @roelandp</a></li>
+         </ul>
+
+        </div>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <!-- Begin page content -->
+    <div class="container">
+
+
+      <div id="custom-search-input" class="row searchcenter">
+          <div class="input-group col-md-4" style="margin: 0 auto;">
+              <input type="text" class="search-query form-control" placeholder="Search" id="searchfield" />
+              <span class="input-group-btn">
+                  <p class="btn btn-default">
+                      <i class="glyphicon glyphicon-search"></i>
+                  </p>
+              </span>
+
+          </div>
+          <button class="btn btn-default pull-right" onclick="sortbyRanking()" style="cursor:pointer;" title="sort by ranking">
+            <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="25"; height="25"; version="1.1" viewBox="0 0 47.5 47.5" style="enable-background:new 0 0 47.5 47.5;" id="svg2" xml:space="preserve"><defs id="defs6"><clipPath id="clipPath18"><path d="M 0,38 38,38 38,0 0,0 0,38 z" id="path20"/></clipPath></defs><g transform="matrix(1.25,0,0,-1.25,0,47.5)" id="g12"><g id="g14"><g clip-path="url(#clipPath18)" id="g16"><g transform="translate(6,32)" id="g22"><path d="M 0,0 6,0 C 7.104,0 8,0.104 8,-1 L 8,1 C 8,2.104 7.104,3 6,3 l -8,0 c -2,0 -3.583,-2.125 -3,-5 0,0 1.791,-9.375 1.917,-9.958 C -2.75,-13.5 -0.958,-15 0.958,-15 l 6.959,0 C 9.021,-15 8,-13.104 8,-12 l 0,2 c 0,-1.104 -0.896,-2 -2,-2 l -4,0 c -1.104,0 -1.833,1.042 -2,2 -0.167,0.958 -1.583,7.333 -1.583,7.333 C -1.917,-0.75 -1.104,0 0,0" id="path24" style="fill:#ffac33;fill-opacity:1;fill-rule:nonzero;stroke:none"/></g><g transform="translate(31.8125,32)" id="g26"><path d="m 0,0 -6,0 c -1.104,0 -2.813,0.104 -2.813,-1 l 0,2 c 0,1.104 1.709,2 2.813,2 l 8,0 c 2,0 3.584,-2.125 3,-5 0,0 -1.633,-9.419 -1.771,-10 -0.354,-1.5 -2.042,-3 -4,-3 l -7.145,0 c -1.105,0 -0.897,1.896 -0.897,3 l 0,2 c 0,-1.104 1.709,-2 2.813,-2 l 4,0 c 1.104,0 1.834,1.042 2,2 0.166,0.958 1.584,7.333 1.584,7.333 C 1.916,-0.75 1.104,0 0,0" id="path28" style="fill:#ffac33;fill-opacity:1;fill-rule:nonzero;stroke:none"/></g><g transform="translate(21.709,15)" id="g30"><path d="m 0,0 c 0,6.958 -2.709,0 -2.709,0 0,0 -3,6.958 -3,0 C -5.709,-6.958 -9,-10 -9,-10 l 6.291,0 6,0 C 3.291,-10 0,-6.958 0,0" id="path32" style="fill:#ffac33;fill-opacity:1;fill-rule:nonzero;stroke:none"/></g><g transform="translate(30,30.4233)" id="g34"><path d="m 0,0 c 0,-6.775 -6.77,-18.192 -11,-18.192 -4.231,0 -11,11.417 -11,18.192 0,5.195 1,6.319 3,6.319 1.374,0 6.025,0.027 8,0.027 1.391,0 5.914,0.002 7,0.002 2.917,0 4,-0.685 4,-6.348" id="path36" style="fill:#ffcc4d;fill-opacity:1;fill-rule:nonzero;stroke:none"/></g><g transform="translate(28,4)" id="g38"><path d="m 0,0 c 0,-1.104 0.104,-2 -1,-2 l -16,0 c -1.104,0 -1,0.896 -1,2 l 0,1 c 0,1.104 1.042,2 2.083,2 L -2,3 C -0.958,3 0,2.104 0,1 L 0,0 z" id="path40" style="fill:#c1694f;fill-opacity:1;fill-rule:nonzero;stroke:none"/></g><g transform="translate(30,2.375)" id="g42"><path d="m 0,0 c 0,-0.76 0.042,-1.375 -1.375,-1.375 l -19.25,0 C -21.917,-1.375 -22,-0.76 -22,0 l 0,0.25 c 0,0.76 0.616,1.375 1.375,1.375 l 19.25,0 C -0.615,1.625 0,1.01 0,0.25 L 0,0 z" id="path44" style="fill:#c1694f;fill-opacity:1;fill-rule:nonzero;stroke:none"/></g></g></g></g></svg>
+          </button>
+      </div>
+
+      <div id="idrow">
+
+        <div class="spinner">
+          <div class="bounce1"></div>
+          <div class="bounce2"></div>
+          <div class="bounce3"></div>
+          <p class="text-center">A growing collection of tools for Steem!</p>
+        </div>
+
+    </div>
+
+  </div>
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted text-center">Made an app for Steem? <a href="http://goo.gl/forms/T5VsngezmiHdWPiV2" target="_blank">Get listed!</a> | <a href="https://steemit.com/steem/@roelandp/steemtools-com-indexing-all-tools-and-services-for-steemit-users">Like this?</a> | <!-- LikeBtn.com BEGIN -->
+          <span class="likebtn-wrapper" data-theme="custom" data-icon_l="arr11-u" data-icon_d="flg1" data-icon_size="16" data-icon_l_c_v="#4ba2f2" data-icon_d_c_v="#4ba2f2" data-label_c_v="#4ba2f2" data-counter_l_c="#1a5099" data-bg_c="#ffffff" data-brdr_c="transparent" data-f_family="Lucida Grande" data-i18n_like="Upvote" data-white_label="true" data-identifier="http://steemtools.com" data-show_like_label="false" data-dislike_enabled="false" data-voting_frequency="604800" data-popup_html="<a href=&quot;http://steemit.com/@roelandp&quot;>Thx ft upvote. Like this update? <br/>Consider upvoting here too!</a>" data-share_enabled="false" data-i18n_like_tooltip="Upvote" data-i18n_unlike_tooltip="Remove upvote" data-i18n_popup_text="Thx for the upvote!"></span></p>
+      </div>
+    </footer>
+
+
+<script>(function(d,e,s){if(d.getElementById("likebtn_wjs"))return;a=d.createElement(e);m=d.getElementsByTagName(e)[0];a.async=1;a.id="likebtn_wjs";a.src=s;m.parentNode.insertBefore(a, m)})(document,"script","//w.likebtn.com/js/w/widget.js");</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-83017380-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</body>
+</html>
